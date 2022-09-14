@@ -41,7 +41,8 @@ private:
     Colour c;
 };
 
-class GridViewerCanvas : public Visualizer
+class GridViewerCanvas : public Visualizer,
+    public Label::Listener
 {
 public:
 
@@ -70,6 +71,9 @@ public:
     /** Called when data acquisition ends.*/
     void endAnimation() override;
 
+    /** Label::Listener callback*/
+    void labelTextChanged(Label* label);
+
     /**
      *  Overrides from juce::Component
      */
@@ -80,11 +84,22 @@ public:
     /** Custom method for updating settings */
     void updateDataStream(DataStream* stream);
 
+    /** Update electrode display dimensions */
+    void updateDisplayDimensions();
+
 private:
     class GridViewerNode* node;
 
     ScopedPointer<class GridViewerViewport> viewport;
     OwnedArray<Electrode> electrodes;
+
+    std::unique_ptr<Label> xDimInput;
+    std::unique_ptr<Label> xDimLabel;
+    std::unique_ptr<Label> yDimInput;
+    std::unique_ptr<Label> yDimLabel;
+
+    int numXPixels = 64;
+    int numYPixels = 64;
 
     int numChannels;
 

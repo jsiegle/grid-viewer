@@ -52,12 +52,94 @@ GridViewerCanvas::GridViewerCanvas(GridViewerNode * node_)
 {
     refreshRate = 30;
 
-    const int totalPixels = 4096; 
+    updateDisplayDimensions();
+
+    xDimLabel = std::make_unique<Label>("X Dimension", "X Dimension:");
+    addAndMakeVisible(xDimLabel.get());
+
+    xDimInput = std::make_unique<Label>("X Dim Input", "64");
+    xDimInput->setEditable(true);
+    xDimInput->setColour(Label::backgroundColourId, Colour(70,70,70));
+    xDimInput->setColour(Label::textColourId, Colours::lightgrey);
+    xDimInput->addListener(this);
+    addAndMakeVisible(xDimInput.get());
+
+    yDimLabel = std::make_unique<Label>("Y Dimension", "Y Dimension:");
+    addAndMakeVisible(yDimLabel.get());
+
+    yDimInput = std::make_unique<Label>("Y Dim Input", "64");
+    yDimInput->setEditable(true);
+    yDimInput->setColour(Label::backgroundColourId, Colour(70, 70, 70));
+    yDimInput->setColour(Label::textColourId, Colours::lightgrey);
+    yDimInput->addListener(this);
+    addAndMakeVisible(yDimInput.get());
+
+}
+
+GridViewerCanvas::~GridViewerCanvas()
+{
+}
+
+void GridViewerCanvas::refreshState()
+{
+}
+
+void GridViewerCanvas::update()
+{
+
+}
+
+void GridViewerCanvas::labelTextChanged(Label* label)
+{
+    int originalValue;
+    int candidateValue = label->getText().getIntValue();
+
+    if (label == xDimInput.get())
+    {
+        originalValue = numXPixels;
+
+        if (candidateValue > 0 && candidateValue <= 64)
+        {
+            numXPixels = candidateValue;
+            updateDisplayDimensions();
+        }
+        else
+        {
+            label->setText(String(originalValue), dontSendNotification);
+        }
+            
+
+    }
+    else {
+        originalValue = numYPixels;
+
+        if (candidateValue > 0 && candidateValue <= 64)
+        {
+            numYPixels = candidateValue;
+            updateDisplayDimensions();
+        }
+        else
+        {
+            label->setText(String(originalValue), dontSendNotification);
+        }
+            
+    }
+}
+
+
+void GridViewerCanvas::updateDisplayDimensions()
+{
+
+    electrodes.clear();
+
+    const int totalPixels = numXPixels * numYPixels;
+
+    LOGC("Total pixels: ", totalPixels);
 
     const int LEFT_BOUND = 20;
     const int TOP_BOUND = 20;
     const int SPACING = 2;
-    const int NUM_COLUMNS = 64;
+    const int NUM_COLUMNS = numXPixels;
     const int HEIGHT = 8;
     const int WIDTH = 8;
 
@@ -78,21 +160,8 @@ GridViewerCanvas::GridViewerCanvas(GridViewerNode * node_)
         addAndMakeVisible(e);
         electrodes.add(e);
     }
-}
-
-GridViewerCanvas::~GridViewerCanvas()
-{
-}
-
-void GridViewerCanvas::refreshState()
-{
-}
-
-void GridViewerCanvas::update()
-{
 
 }
-
 
 void GridViewerCanvas::refresh()
 {
@@ -100,7 +169,9 @@ void GridViewerCanvas::refresh()
 
     //std::cout << "Refresh." << std::endl;
 
-    for (int i = 0; i < numChannels; i++)
+    int maxChan = jmin(electrodes.size(), numChannels);
+
+    for (int i = 0; i < maxChan; i++)
     {
         electrodes[i]->setColour(ColourScheme::getColourForNormalizedValue(peakToPeakValues[i] / 200));
     }
@@ -153,11 +224,10 @@ void GridViewerCanvas::paint(Graphics &g)
 
 void GridViewerCanvas::resized()
 {
-    //viewport->setBounds(0,
-    //                    0,
-     //                   getWidth(),
-     //                   getHeight());
-
+    xDimLabel->setBounds(100, getHeight() - 50, 100, 20);
+    xDimInput->setBounds(200, getHeight() - 50, 50, 20);
+    yDimLabel->setBounds(300, getHeight() - 50, 100, 20);
+    yDimInput->setBounds(400, getHeight() - 50, 50, 20);
 }
 
 #pragma mark - GridViewerViewport -
