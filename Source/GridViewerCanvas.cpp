@@ -173,7 +173,7 @@ void GridViewerCanvas::refresh()
 
     for (int i = 0; i < maxChan; i++)
     {
-        electrodes[i]->setColour(ColourScheme::getColourForNormalizedValue(peakToPeakValues[i] / 200));
+        electrodes[i]->setColour(ColourScheme::getColourForNormalizedValue((float)(peakToPeakValues[i] / 200)));
     }
 
     repaint();
